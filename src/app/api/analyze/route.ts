@@ -1,5 +1,4 @@
 import { NextRequest, NextResponse } from 'next/server'
-import OpenAI from 'openai'
 
 export const maxDuration = 60
 
@@ -8,39 +7,47 @@ export async function POST(req: NextRequest) {
     const { image } = await req.json()
     if (!image) return NextResponse.json({ error: '이미지가 없습니다' }, { status: 400 })
 
-    const apiKey = process.env.OPENAI_API_KEY
+    const apiKey = process.env.GEMINI_API_KEY
     if (!apiKey) return NextResponse.json({ error: 'API 키 미설정' }, { status: 500 })
 
-    const openai = new OpenAI({ apiKey })
+    // base64 데이터 추출
+    const base64Match = image.match(/^data:image\/(\w+);base64,(.+)$/)
+    if (!base64Match) return NextResponse.json({ error: '잘못된 이미지 형식' }, { status: 400 })
 
-    const response = await openai.chat.completions.create({
-      model: 'gpt-4o',
-      max_tokens: 2000,
-      messages: [
-        {
-          role: 'system',
-          content: `당신은 한국 주정차 위반 전문 법률 AI 어시스턴트입니다.
-사용자가 보내는 주정차 위반 딱지(고지서) 사진을 분석하여 다음 JSON 형식으로 응답하세요:
+    const mimeType = `image/${base64Match[1]}`
+    const base64Data = base64Match[2]
+
+    const response = await fetch(
+      `https://generativelanguage.googleapis.com/v1beta/models/gemini-2.0-flash:generateContent?key=${apiKey}`,
+      {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          contents: [{
+            parts: [
+              {
+                text: `당신은 한국 주정차 위반 전문 법률 AI 어시스턴트입니다.
+이 주정차 위반 딱지(고지서) 사진을 분석하여 다음 JSON 형식으로만 응답하세요. 마크다운 코드블록 없이 순수 JSON만 응답:
 
 {
   "violation_type": "위반 유형 (예: 주차위반, 정차위반, 소화전 앞 주차 등)",
   "fine_amount": "과태료 금액 (예: 40,000원)",
-  "violation_date": "위반 일시 (예: 2026년 2월 26일 14:30)",
+  "violation_date": "위반 일시",
   "violation_location": "위반 장소",
   "vehicle_number": "차량 번호",
   "appeal_chance": "높음/보통/낮음",
   "appeal_reason": "이의신청 가능성에 대한 근거 설명 (2-3문장)",
   "appeal_points": ["이의신청 시 주장할 수 있는 포인트 배열"],
-  "appeal_letter": "실제 이의신청서 전문 (아래 양식 참고)"
+  "appeal_letter": "이의신청서 전문 (아래 양식)"
 }
 
 【이의신청서 양식】
 이의신청서
 
 1. 신청인 정보
-  - 성명: [사용자가 입력]
+  - 성명: ___
   - 차량번호: [딱지에서 읽은 번호]
-  - 연락처: [사용자가 입력]
+  - 연락처: ___
 
 2. 위반 내용
   - 위반 일시: [딱지에서 읽은 일시]
@@ -49,9 +56,7 @@ export async function POST(req: NextRequest) {
   - 과태료: [금액]
 
 3. 이의신청 사유
-  [구체적인 이의신청 사유를 법적 근거와 함께 작성.
-   도로교통법 관련 조항을 인용하고,
-   가능한 항소 포인트를 논리적으로 서술.]
+  [구체적인 이의신청 사유를 도로교통법 조항과 함께 작성. 가능한 항소 포인트를 논리적으로 서술.]
 
 4. 증빙자료
   - 별첨
@@ -59,32 +64,41 @@ export async function POST(req: NextRequest) {
 위와 같이 이의신청합니다.
 
 날짜: [오늘 날짜]
-신청인: [성명] (인)
+신청인: ___ (인)
 
 ---
-주의사항:
-- 딱지가 아닌 이미지가 오면 "이 이미지에서 주정차 위반 딱지를 찾을 수 없습니다"라고 안내
-- 이의신청서는 정중하고 논리적인 어조로 작성
-- 실제 법적 효력을 가질 수 있도록 도로교통법 조항 인용
-- appeal_letter의 [사용자가 입력] 부분은 "___" (빈칸)으로 표시
-- JSON만 응답 (마크다운 없이)`
-        },
-        {
-          role: 'user',
-          content: [
-            { type: 'text', text: '이 주정차 위반 딱지를 분석해주세요.' },
-            { type: 'image_url', image_url: { url: image, detail: 'high' } },
-          ],
-        },
-      ],
-    })
+주의: 딱지가 아닌 이미지면 violation_type을 "딱지 아님"으로, appeal_letter를 "이 이미지에서 주정차 위반 딱지를 찾을 수 없습니다."로 응답.`
+              },
+              {
+                inlineData: {
+                  mimeType,
+                  data: base64Data,
+                },
+              },
+            ],
+          }],
+          generationConfig: {
+            temperature: 0.2,
+            maxOutputTokens: 2048,
+          },
+        }),
+      }
+    )
 
-    const text = response.choices[0]?.message?.content || ''
+    if (!response.ok) {
+      const err = await response.text()
+      console.error('Gemini error:', err)
+      throw new Error('Gemini API 오류')
+    }
+
+    const data = await response.json()
+    const text = data.candidates?.[0]?.content?.parts?.[0]?.text || ''
 
     // JSON 파싱
     let parsed
     try {
-      const jsonMatch = text.match(/\{[\s\S]*\}/)
+      const cleaned = text.replace(/```json\s*/g, '').replace(/```\s*/g, '').trim()
+      const jsonMatch = cleaned.match(/\{[\s\S]*\}/)
       parsed = jsonMatch ? JSON.parse(jsonMatch[0]) : { appeal_letter: text }
     } catch {
       parsed = { appeal_letter: text }
