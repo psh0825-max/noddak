@@ -1,7 +1,7 @@
 'use client'
 
 import { useState, useRef } from 'react'
-import { Camera, Upload, FileText, AlertTriangle, ChevronRight, Shield, Zap, CheckCircle } from 'lucide-react'
+import { Camera, Upload, FileText, AlertTriangle, ChevronRight, Shield, Zap, CheckCircle, Download, BookOpen } from 'lucide-react'
 import { toast } from 'sonner'
 
 export default function Home() {
@@ -97,9 +97,17 @@ export default function Home() {
         </div>
 
         {/* Footer */}
-        <footer className="text-center py-6 text-xs text-gray-400">
-          <Shield size={12} className="inline mr-1" />
-          사진은 서버에 저장되지 않습니다
+        <footer className="text-center py-6 space-y-2">
+          <div className="text-xs text-gray-400">
+            <Shield size={12} className="inline mr-1" />
+            사진은 서버에 저장되지 않습니다
+          </div>
+          <div className="flex justify-center gap-4 text-xs text-gray-400">
+            <a href="/guide" className="hover:text-gray-600">📖 사용 가이드</a>
+            <a href="/privacy" className="hover:text-gray-600">개인정보처리방침</a>
+            <a href="/terms" className="hover:text-gray-600">이용약관</a>
+          </div>
+          <div className="text-xs text-gray-300">© 2026 LightOn Plus Lab</div>
         </footer>
       </div>
     )
@@ -223,11 +231,25 @@ export default function Home() {
             navigator.clipboard.writeText(result.appeal_letter || '')
             toast.success('이의신청서가 복사되었습니다')
           }} className="btn-primary flex-1">
-            <CheckCircle size={18} /> 복사하기
+            <CheckCircle size={18} /> 복사
+          </button>
+          <button onClick={() => {
+            const text = result.appeal_letter || ''
+            const html = `<html><head><meta charset="utf-8"><style>body{font-family:sans-serif;padding:40px;line-height:1.8;white-space:pre-wrap;font-size:14px}h1{font-size:20px;text-align:center;margin-bottom:24px}</style></head><body><h1>이의신청서</h1>${text}</body></html>`
+            const blob = new Blob([html], { type: 'application/octet-stream' })
+            const url = URL.createObjectURL(blob)
+            const a = document.createElement('a')
+            a.href = url
+            a.download = '이의신청서_노딱AI.html'
+            a.click()
+            URL.revokeObjectURL(url)
+            toast.success('이의신청서가 다운로드되었습니다')
+          }} className="btn-outline flex-1">
+            <Download size={18} /> 저장
           </button>
           <button onClick={() => { setStep('upload'); setImage(null); setResult(null) }}
             className="btn-outline flex-1">
-            다시 분석
+            다시
           </button>
         </div>
 
