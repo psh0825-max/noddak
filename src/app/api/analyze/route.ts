@@ -233,24 +233,53 @@ ${LEGAL_REFERENCE}
 
     console.log('Selected text (first 300):', text.substring(0, 300))
 
-    let parsed
+    let parsed: any
     try {
-      const cleaned = text.replace(/```json\s*/g, '').replace(/```\s*/g, '').trim()
-      // Find the outermost JSON object
-      let depth = 0, start = -1, end = -1
-      for (let i = 0; i < cleaned.length; i++) {
-        if (cleaned[i] === '{') { if (depth === 0) start = i; depth++; }
-        else if (cleaned[i] === '}') { depth--; if (depth === 0) { end = i; break; } }
+      // First try direct parse
+      parsed = JSON.parse(text)
+      console.log('Direct parse OK, keys:', Object.keys(parsed))
+    } catch (e1) {
+      console.log('Direct parse failed, trying cleanup...')
+      try {
+        const cleaned = text.replace(/```json\s*/g, '').replace(/```\s*/g, '').trim()
+        // Find outermost JSON
+        let depth = 0, start = -1, end = -1
+        for (let i = 0; i < cleaned.length; i++) {
+          if (cleaned[i] === '{') { if (depth === 0) start = i; depth++; }
+          else if (cleaned[i] === '}') { depth--; if (depth === 0) { end = i; break; } }
+        }
+        if (start >= 0 && end > start) {
+          parsed = JSON.parse(cleaned.substring(start, end + 1))
+          console.log('Cleanup parse OK, keys:', Object.keys(parsed))
+        } else {
+          throw new Error('No JSON found')
+        }
+      } catch (e2) {
+        console.error('All parse attempts failed:', e2)
+        // Last resort: extract fields manually with regex
+        const getField = (key: string) => {
+          const m = text.match(new RegExp(`"${key}"\\s*:\\s*"([^"]*)"`, 's'))
+          return m ? m[1] : undefined
+        }
+        const getArray = (key: string) => {
+          const m = text.match(new RegExp(`"${key}"\\s*:\\s*\\[([^\\]]*)\\]`, 's'))
+          if (!m) return undefined
+          return m[1].match(/"([^"]*)"/g)?.map(s => s.replace(/"/g, ''))
+        }
+        parsed = {
+          violation_type: getField('violation_type'),
+          fine_amount: getField('fine_amount'),
+          violation_date: getField('violation_date'),
+          violation_location: getField('violation_location'),
+          vehicle_number: getField('vehicle_number'),
+          appeal_chance: getField('appeal_chance'),
+          appeal_reason: getField('appeal_reason'),
+          appeal_points: getArray('appeal_points'),
+          legal_basis: getArray('legal_basis'),
+          appeal_letter: getField('appeal_letter') || text,
+        }
+        console.log('Regex parse, keys with values:', Object.keys(parsed).filter(k => (parsed as any)[k]))
       }
-      if (start >= 0 && end > start) {
-        parsed = JSON.parse(cleaned.substring(start, end + 1))
-      } else {
-        parsed = { appeal_letter: text }
-      }
-      console.log('Parsed keys:', Object.keys(parsed))
-    } catch (e) {
-      console.error('JSON parse error:', e)
-      parsed = { appeal_letter: text }
     }
 
     return NextResponse.json(parsed)
