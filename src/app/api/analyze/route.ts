@@ -206,18 +206,47 @@ ${LEGAL_REFERENCE}
     }
 
     const data = await response.json()
-    // Gemini 2.5 has thinking parts - get the last text part (the actual response)
     const parts = data.candidates?.[0]?.content?.parts || []
-    const textParts = parts.filter((p: any) => p.text && !p.thought)
-    const text = textParts[textParts.length - 1]?.text || parts[parts.length - 1]?.text || ''
+    
+    // Log all parts for debugging
+    console.log('Parts count:', parts.length)
+    parts.forEach((p: any, i: number) => {
+      console.log(`Part ${i}: thought=${!!p.thought}, hasText=${!!p.text}, textLen=${p.text?.length || 0}`)
+    })
 
-    console.log('Gemini raw text (first 500):', text.substring(0, 500))
+    // Gemini 2.5 thinking: find the part that contains valid JSON (non-thought)
+    let text = ''
+    for (let i = parts.length - 1; i >= 0; i--) {
+      const p = parts[i]
+      if (p.text && !p.thought) {
+        text = p.text
+        break
+      }
+    }
+    // Fallback: just grab any text
+    if (!text) {
+      for (const p of parts) {
+        if (p.text) { text = p.text; break; }
+      }
+    }
+
+    console.log('Selected text (first 300):', text.substring(0, 300))
 
     let parsed
     try {
       const cleaned = text.replace(/```json\s*/g, '').replace(/```\s*/g, '').trim()
-      const jsonMatch = cleaned.match(/\{[\s\S]*\}/)
-      parsed = jsonMatch ? JSON.parse(jsonMatch[0]) : { appeal_letter: text }
+      // Find the outermost JSON object
+      let depth = 0, start = -1, end = -1
+      for (let i = 0; i < cleaned.length; i++) {
+        if (cleaned[i] === '{') { if (depth === 0) start = i; depth++; }
+        else if (cleaned[i] === '}') { depth--; if (depth === 0) { end = i; break; } }
+      }
+      if (start >= 0 && end > start) {
+        parsed = JSON.parse(cleaned.substring(start, end + 1))
+      } else {
+        parsed = { appeal_letter: text }
+      }
+      console.log('Parsed keys:', Object.keys(parsed))
     } catch (e) {
       console.error('JSON parse error:', e)
       parsed = { appeal_letter: text }
