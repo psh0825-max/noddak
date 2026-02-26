@@ -190,6 +190,23 @@ export default function Home() {
           <p className="text-sm text-gray-500">{result.appeal_reason || ''}</p>
         </div>
 
+        {/* 법적 근거 */}
+        {result.legal_basis && result.legal_basis.length > 0 && (
+          <div className="card mb-4">
+            <div className="flex items-center gap-2 mb-3">
+              <FileText size={18} className="text-red-500" />
+              <span className="font-bold">적용 법령</span>
+            </div>
+            <ul className="space-y-1">
+              {result.legal_basis.map((law: string, i: number) => (
+                <li key={i} className="text-sm text-gray-600 flex items-start gap-2">
+                  <span className="text-red-400 mt-0.5">§</span> {law}
+                </li>
+              ))}
+            </ul>
+          </div>
+        )}
+
         {/* 이의신청서 */}
         <div className="card mb-6">
           <div className="flex items-center gap-2 mb-3">
