@@ -206,14 +206,20 @@ ${LEGAL_REFERENCE}
     }
 
     const data = await response.json()
-    const text = data.candidates?.[0]?.content?.parts?.[0]?.text || ''
+    // Gemini 2.5 has thinking parts - get the last text part (the actual response)
+    const parts = data.candidates?.[0]?.content?.parts || []
+    const textParts = parts.filter((p: any) => p.text && !p.thought)
+    const text = textParts[textParts.length - 1]?.text || parts[parts.length - 1]?.text || ''
+
+    console.log('Gemini raw text (first 500):', text.substring(0, 500))
 
     let parsed
     try {
       const cleaned = text.replace(/```json\s*/g, '').replace(/```\s*/g, '').trim()
       const jsonMatch = cleaned.match(/\{[\s\S]*\}/)
       parsed = jsonMatch ? JSON.parse(jsonMatch[0]) : { appeal_letter: text }
-    } catch {
+    } catch (e) {
+      console.error('JSON parse error:', e)
       parsed = { appeal_letter: text }
     }
 
