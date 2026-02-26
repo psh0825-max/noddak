@@ -231,12 +231,13 @@ ${LEGAL_REFERENCE}
       }
     }
 
-    console.log('Selected text (first 300):', text.substring(0, 300))
+    console.log('Selected text (first 500):', JSON.stringify(text.substring(0, 500)))
 
     let parsed: any
     try {
-      // First try direct parse
-      parsed = JSON.parse(text)
+      // First try direct parse - fix unescaped newlines in string values
+      const fixedText = text.replace(/(?<=:\s*"[^"]*)\n(?=[^"]*")/g, '\\n')
+      parsed = JSON.parse(fixedText)
       console.log('Direct parse OK, keys:', Object.keys(parsed))
     } catch (e1) {
       console.log('Direct parse failed, trying cleanup...')
