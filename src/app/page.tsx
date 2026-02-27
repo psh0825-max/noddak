@@ -42,9 +42,9 @@ export default function Home() {
   // ─── HOME ───
   if (step === 'home') {
     return (
-      <div className="min-h-screen flex flex-col">
+      <div className="min-h-screen flex flex-col items-center">
         {/* Bold Red Hero */}
-        <div className="hero-top px-6 pt-14 pb-16 text-center relative">
+        <div className="hero-top px-6 pt-14 pb-16 text-center relative w-full">
           {/* Floating decorations */}
           <div className="floating-shape w-32 h-32 bg-white" style={{ top: '10%', right: '-5%', animationDelay: '0s' }} />
           <div className="floating-shape w-20 h-20 bg-white" style={{ top: '60%', left: '-3%', animationDelay: '2s' }} />
@@ -80,7 +80,7 @@ export default function Home() {
         </div>
 
         {/* Stats section */}
-        <div className="relative z-10 -mt-5 px-6">
+        <div className="relative z-10 -mt-5 px-6 w-full max-w-md">
           <div className="animate-fade-in-delay-2 grid grid-cols-3 gap-3">
             {[
               { num: '10초', label: '분석 시간', icon: <Zap size={16} className="text-orange-500" /> },
@@ -127,7 +127,7 @@ export default function Home() {
         </div>
 
         {/* CTA repeat */}
-        <div className="px-6 mt-14 mb-6">
+        <div className="px-6 mt-14 mb-6 w-full max-w-md">
           <div className="card-highlight text-center py-8 px-6">
             <div className="text-4xl mb-3">🚗</div>
             <div className="font-extrabold text-lg mb-2">딱지 받으셨나요?</div>
@@ -139,14 +139,14 @@ export default function Home() {
         </div>
 
         {/* Trust */}
-        <div className="mt-6 flex justify-center gap-6 text-xs text-gray-400 items-center px-6">
+        <div className="mt-6 flex justify-center gap-6 text-xs text-gray-400 items-center px-6 w-full max-w-md">
           <span className="flex items-center gap-1.5"><Shield size={13} /> 사진 미저장</span>
           <span className="flex items-center gap-1.5"><Scale size={13} /> 실제 법률 근거</span>
           <span className="flex items-center gap-1.5"><Sparkles size={13} /> 완전 무료</span>
         </div>
 
         {/* Footer */}
-        <footer className="text-center py-10 mt-8 space-y-3 border-t border-gray-100 mx-6">
+        <footer className="text-center py-10 mt-8 space-y-3 border-t border-gray-100 w-full max-w-md px-6">
           <div className="flex justify-center gap-5 text-sm text-gray-400">
             <a href="/guide" className="hover:text-red-500 transition">📖 사용 가이드</a>
             <a href="/privacy" className="hover:text-red-500 transition">개인정보처리방침</a>
@@ -162,9 +162,9 @@ export default function Home() {
   if (step === 'upload') {
     return (
       <div className="min-h-screen flex flex-col">
-        <div className="hero-top px-6 pt-10 pb-14 text-center relative">
-          <div className="relative z-10">
-            <button onClick={() => setStep('home')} className="absolute left-0 top-0 text-white/70 text-sm hover:text-white transition">← 뒤로</button>
+        <div className="hero-top px-6 pt-10 pb-16 text-center relative">
+          <div className="relative z-10 max-w-md mx-auto">
+            <button onClick={() => setStep('home')} className="absolute left-0 top-0.5 text-white/70 text-sm hover:text-white transition font-medium">← 뒤로</button>
             <div className="icon-circle-lg bg-white/15 backdrop-blur-sm mx-auto mb-3 border border-white/25">
               <Camera size={30} className="text-white" />
             </div>
@@ -173,7 +173,7 @@ export default function Home() {
           </div>
         </div>
 
-        <div className="flex-1 px-6 -mt-5 relative z-10 max-w-md mx-auto w-full">
+        <div className="flex-1 px-6 -mt-6 relative z-10 max-w-md mx-auto w-full">
           {image && (
             <div className="animate-scale-in mb-5">
               <img src={image} alt="딱지" className="rounded-2xl border-2 border-gray-100 w-full shadow-lg" />
@@ -181,30 +181,30 @@ export default function Home() {
           )}
 
           {!image && (
-            <div className="card text-center py-12 mb-5 border-dashed border-2 border-gray-200">
-              <div className="icon-circle icon-circle-red mx-auto mb-3">
-                <Upload size={24} />
+            <div className="card text-center py-14 mb-5 border-dashed border-2 border-gray-200">
+              <div className="icon-circle icon-circle-red mx-auto mb-4" style={{ width: 60, height: 60, borderRadius: 18 }}>
+                <Upload size={26} />
               </div>
-              <div className="text-sm font-bold text-gray-600 mb-1">사진을 선택하세요</div>
-              <div className="text-xs text-gray-400">카메라로 촬영하거나 갤러리에서 선택</div>
+              <div className="text-[15px] font-bold text-gray-600 mb-1.5">사진을 선택하세요</div>
+              <div className="text-sm text-gray-400">카메라로 촬영하거나 갤러리에서 선택</div>
             </div>
           )}
 
-          <div className="flex gap-3">
+          <div className="grid grid-cols-2 gap-3">
             <input ref={cameraRef} type="file" accept="image/*" capture="environment" className="hidden"
               onChange={(e) => e.target.files?.[0] && handleFile(e.target.files[0])} />
-            <button onClick={() => cameraRef.current?.click()} className="btn-primary flex-1">
+            <button onClick={() => cameraRef.current?.click()} className="btn-primary !text-[15px] !py-4">
               <Camera size={18} /> 촬영
             </button>
 
             <input ref={fileRef} type="file" accept="image/*" className="hidden"
               onChange={(e) => e.target.files?.[0] && handleFile(e.target.files[0])} />
-            <button onClick={() => fileRef.current?.click()} className="btn-outline flex-1">
+            <button onClick={() => fileRef.current?.click()} className="btn-outline !text-[15px] !py-4 w-full">
               <Upload size={18} /> 갤러리
             </button>
           </div>
 
-          <p className="text-xs text-gray-400 text-center mt-5 flex items-center justify-center gap-1.5">
+          <p className="text-xs text-gray-400 text-center mt-6 flex items-center justify-center gap-1.5">
             <Shield size={11} /> 사진은 분석 후 즉시 삭제되며 서버에 저장되지 않습니다
           </p>
         </div>
