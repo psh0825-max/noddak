@@ -170,7 +170,7 @@ export default function Home() {
           <div className="floating-shape w-32 h-32 bg-white" style={{ top: '10%', right: '-5%', animationDelay: '0s' }} />
           <div className="floating-shape w-20 h-20 bg-white" style={{ top: '60%', left: '-3%', animationDelay: '2s' }} />
           <div className="floating-shape w-16 h-16 bg-white" style={{ top: '30%', left: '15%', animationDelay: '4s' }} />
-          <div className="relative z-10">
+          <div className="relative z-10 max-w-md mx-auto">
             <div className="animate-fade-in mb-5">
               <div className="w-20 h-20 rounded-2xl bg-white/20 backdrop-blur-sm flex items-center justify-center mx-auto mb-4 border border-white/30 animate-pulse-glow">
                 <Car size={38} className="text-white drop-shadow-lg" />
