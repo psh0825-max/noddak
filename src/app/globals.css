@@ -1,5 +1,7 @@
 @import "tailwindcss";
 
+@custom-variant dark (&:where(.dark, .dark *));
+
 :root {
   --primary: #dc2626;
   --primary-dark: #b91c1c;
@@ -10,6 +12,15 @@
   --text: #111827;
   --muted: #6b7280;
   --border: #e5e7eb;
+}
+
+.dark {
+  --bg: #111827;
+  --card: #1f2937;
+  --text: #f9fafb;
+  --muted: #9ca3af;
+  --border: #374151;
+  --primary-light: #1a0505;
 }
 
 * { box-sizing: border-box; margin: 0; padding: 0; }
@@ -27,6 +38,10 @@ body {
   background-size: 300% 300%;
   animation: gradientShift 12s ease infinite;
   position: relative;
+}
+.dark .hero-bg {
+  background: linear-gradient(160deg, #1a0505 0%, #1a0f05 25%, #1a1a05 50%, #1a0510 75%, #1a0505 100%);
+  background-size: 300% 300%;
 }
 .hero-bg::before {
   content: ''; position: absolute; inset: 0; pointer-events: none;
@@ -88,14 +103,6 @@ body {
   0%, 100% { transform: translateY(0); }
   50% { transform: translateY(-4px); }
 }
-@keyframes shimmer {
-  0% { background-position: -200% 0; }
-  100% { background-position: 200% 0; }
-}
-@keyframes rotate-slow {
-  from { transform: rotate(0deg); }
-  to { transform: rotate(360deg); }
-}
 
 .animate-fade-in { animation: fadeInUp 0.6s ease-out both; }
 .animate-fade-in-delay { animation: fadeInUp 0.6s ease-out 0.15s both; }
@@ -131,7 +138,7 @@ body {
 .btn-outline {
   display: inline-flex; align-items: center; justify-content: center; gap: 8px;
   padding: 16px 22px; border-radius: 16px;
-  border: 2px solid var(--border); background: white; color: var(--text);
+  border: 2px solid var(--border); background: var(--card); color: var(--text);
   font-weight: 700; font-size: 16px; cursor: pointer; transition: all 0.3s;
   width: 100%;
 }
@@ -157,7 +164,7 @@ body {
 
 /* ─── Cards ─── */
 .card {
-  background: white; border: 1px solid var(--border);
+  background: var(--card); border: 1px solid var(--border);
   border-radius: 20px; padding: 20px;
   box-shadow: 0 1px 3px rgba(0,0,0,0.04), 0 4px 12px rgba(0,0,0,0.02);
   transition: all 0.3s;
@@ -174,17 +181,15 @@ body {
 .card-glass:hover { background: rgba(255, 255, 255, 0.25); }
 
 .card-highlight {
-  background: white; border: 2px solid transparent;
+  background: var(--card); border: 2px solid transparent;
   border-radius: 20px; padding: 20px;
   box-shadow: 0 4px 20px rgba(220, 38, 38, 0.08);
-  background-image: linear-gradient(white, white), linear-gradient(135deg, #dc2626, #f97316);
+  background-image: linear-gradient(var(--card), var(--card)), linear-gradient(135deg, #dc2626, #f97316);
   background-origin: border-box; background-clip: padding-box, border-box;
 }
 
 /* ─── Stat card ─── */
-.stat-card {
-  text-align: center; padding: 24px 16px;
-}
+.stat-card { text-align: center; padding: 24px 16px; }
 .stat-number {
   font-size: 28px; font-weight: 900;
   background: linear-gradient(135deg, #dc2626, #f97316);
@@ -206,27 +211,22 @@ body {
   font-size: 12px; font-weight: 700;
 }
 .badge-red { background: #fef2f2; color: #dc2626; }
+.dark .badge-red { background: #450a0a; color: #fca5a5; }
 .badge-green { background: #f0fdf4; color: #16a34a; }
 .badge-yellow { background: #fefce8; color: #ca8a04; }
 .badge-gray { background: #f3f4f6; color: #6b7280; }
-.badge-gradient {
-  background: linear-gradient(135deg, #dc2626, #f97316);
-  color: white; border: none;
-}
-.badge-white {
-  background: rgba(255,255,255,0.2); color: white;
-  border: 1px solid rgba(255,255,255,0.3);
-}
+.badge-gradient { background: linear-gradient(135deg, #dc2626, #f97316); color: white; border: none; }
+.badge-white { background: rgba(255,255,255,0.2); color: white; border: 1px solid rgba(255,255,255,0.3); }
 
 /* ─── Result cards ─── */
 .result-card {
-  background: white; border-radius: 20px; padding: 20px;
+  background: var(--card); border-radius: 20px; padding: 20px;
   border: 1px solid var(--border);
   box-shadow: 0 2px 8px rgba(0,0,0,0.04);
 }
 .result-item {
   display: flex; justify-content: space-between; align-items: center;
-  padding: 12px 0; border-bottom: 1px solid #f3f4f6;
+  padding: 12px 0; border-bottom: 1px solid var(--border);
 }
 .result-item:last-child { border-bottom: none; }
 
@@ -243,6 +243,7 @@ body {
   border-radius: 50%;
   animation: spin 0.8s linear infinite;
 }
+.dark .spinner { border-color: #450a0a; border-top-color: #dc2626; }
 @keyframes spin { to { transform: rotate(360deg); } }
 
 /* ─── Icon circle ─── */
@@ -272,3 +273,14 @@ body {
 ::-webkit-scrollbar { width: 4px; }
 ::-webkit-scrollbar-track { background: transparent; }
 ::-webkit-scrollbar-thumb { background: #ddd; border-radius: 4px; }
+.dark ::-webkit-scrollbar-thumb { background: #555; }
+
+/* ─── Print ─── */
+@media print {
+  body { background: white !important; color: black !important; }
+  .hero-top, .btn-primary, .btn-outline, .btn-white, .btn-sm,
+  button, nav, footer, .floating-shape { display: none !important; }
+  .result-card { box-shadow: none !important; border: 1px solid #ddd !important; break-inside: avoid; page-break-inside: avoid; }
+  .dark { --bg: white; --card: white; --text: black; --border: #ddd; }
+  @page { margin: 20mm; }
+}

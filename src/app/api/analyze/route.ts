@@ -181,10 +181,11 @@ ${LEGAL_REFERENCE}
 
 ---
 주의:
-- 딱지가 아닌 이미지면 violation_type을 "딱지 아님"으로 설정
+- 딱지가 아닌 이미지(음식, 풍경, 사람, 영수증, 일반 문서 등)인 경우 반드시 violation_type을 "딱지 아님"으로 설정하고 appeal_letter에 "이 이미지는 주정차 위반 딱지가 아닙니다."라고 작성
 - 이의신청서는 정중하고 논리적인 법률 문서 어조
 - 반드시 실제 법 조항의 조·항·호 번호를 정확히 인용
-- appeal_letter의 빈칸은 "___"로 표시`
+- appeal_letter의 빈칸은 "___"로 표시
+- appeal_letter 내의 줄바꿈은 반드시 \\n으로 이스케이프 처리 (JSON 호환)`
               },
               {
                 inlineData: { mimeType, data: base64Data },
@@ -234,54 +235,67 @@ ${LEGAL_REFERENCE}
     console.log('Selected text (first 500):', JSON.stringify(text.substring(0, 500)))
 
     let parsed: any
-    try {
-      // First try direct parse - fix unescaped newlines in string values
-      const fixedText = text.replace(/(?<=:\s*"[^"]*)\n(?=[^"]*")/g, '\\n')
-      parsed = JSON.parse(fixedText)
-      console.log('Direct parse OK, keys:', Object.keys(parsed))
-    } catch (e1) {
-      console.log('Direct parse failed, trying cleanup...')
-      try {
-        const cleaned = text.replace(/```json\s*/g, '').replace(/```\s*/g, '').trim()
-        // Find outermost JSON
-        let depth = 0, start = -1, end = -1
-        for (let i = 0; i < cleaned.length; i++) {
-          if (cleaned[i] === '{') { if (depth === 0) start = i; depth++; }
-          else if (cleaned[i] === '}') { depth--; if (depth === 0) { end = i; break; } }
+
+    // Since responseMimeType is 'application/json', Gemini should return valid JSON.
+    // But we still need robust parsing for edge cases.
+    const tryParse = (str: string): any => {
+      try { return JSON.parse(str) } catch { return null }
+    }
+
+    // Attempt 1: Direct parse
+    parsed = tryParse(text)
+
+    // Attempt 2: Fix unescaped newlines in string values
+    if (!parsed) {
+      const fixedText = text.replace(/(?<=:\s*"(?:[^"\\]|\\.)*)(?<!\\)\n/g, '\\n')
+      parsed = tryParse(fixedText)
+    }
+
+    // Attempt 3: Extract JSON object from text
+    if (!parsed) {
+      const cleaned = text.replace(/```json\s*/g, '').replace(/```\s*/g, '').trim()
+      let depth = 0, start = -1, end = -1
+      for (let i = 0; i < cleaned.length; i++) {
+        if (cleaned[i] === '{') { if (depth === 0) start = i; depth++ }
+        else if (cleaned[i] === '}') { depth--; if (depth === 0) { end = i; break } }
+      }
+      if (start >= 0 && end > start) {
+        const substr = cleaned.substring(start, end + 1)
+        parsed = tryParse(substr)
+        // Try fixing newlines in extracted substring
+        if (!parsed) {
+          parsed = tryParse(substr.replace(/(?<=:\s*"(?:[^"\\]|\\.)*)(?<!\\)\n/g, '\\n'))
         }
-        if (start >= 0 && end > start) {
-          parsed = JSON.parse(cleaned.substring(start, end + 1))
-          console.log('Cleanup parse OK, keys:', Object.keys(parsed))
-        } else {
-          throw new Error('No JSON found')
-        }
-      } catch (e2) {
-        console.error('All parse attempts failed:', e2)
-        // Last resort: extract fields manually with regex
-        const getField = (key: string) => {
-          const m = text.match(new RegExp(`"${key}"\\s*:\\s*"([^"]*)"`, 's'))
-          return m ? m[1] : undefined
-        }
-        const getArray = (key: string) => {
-          const m = text.match(new RegExp(`"${key}"\\s*:\\s*\\[([^\\]]*)\\]`, 's'))
-          if (!m) return undefined
-          return m[1].match(/"([^"]*)"/g)?.map(s => s.replace(/"/g, ''))
-        }
-        parsed = {
-          violation_type: getField('violation_type'),
-          fine_amount: getField('fine_amount'),
-          violation_date: getField('violation_date'),
-          violation_location: getField('violation_location'),
-          vehicle_number: getField('vehicle_number'),
-          appeal_chance: getField('appeal_chance'),
-          appeal_reason: getField('appeal_reason'),
-          appeal_points: getArray('appeal_points'),
-          legal_basis: getArray('legal_basis'),
-          appeal_letter: getField('appeal_letter') || text,
-        }
-        console.log('Regex parse, keys with values:', Object.keys(parsed).filter(k => (parsed as any)[k]))
       }
     }
+
+    // Attempt 4: Regex extraction as last resort
+    if (!parsed) {
+      console.error('All JSON parse attempts failed, using regex extraction')
+      const getField = (key: string) => {
+        const m = text.match(new RegExp(`"${key}"\\s*:\\s*"((?:[^"\\\\]|\\\\.)*)"`, 's'))
+        return m ? m[1].replace(/\\n/g, '\n').replace(/\\"/g, '"') : undefined
+      }
+      const getArray = (key: string) => {
+        const m = text.match(new RegExp(`"${key}"\\s*:\\s*\\[([^\\]]*)\\]`, 's'))
+        if (!m) return undefined
+        return m[1].match(/"((?:[^"\\\\]|\\\\.)*)"/g)?.map(s => s.slice(1, -1))
+      }
+      parsed = {
+        violation_type: getField('violation_type') || '분석 실패',
+        fine_amount: getField('fine_amount'),
+        violation_date: getField('violation_date'),
+        violation_location: getField('violation_location'),
+        vehicle_number: getField('vehicle_number'),
+        appeal_chance: getField('appeal_chance') || '보통',
+        appeal_reason: getField('appeal_reason'),
+        appeal_points: getArray('appeal_points'),
+        legal_basis: getArray('legal_basis'),
+        appeal_letter: getField('appeal_letter') || text,
+      }
+    }
+
+    console.log('Parse result keys:', Object.keys(parsed))
 
     return NextResponse.json(parsed)
   } catch (error: any) {

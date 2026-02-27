@@ -1,0 +1,24 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width,initial-scale=1">
+  <title>노딱AI - 오프라인</title>
+  <style>
+    *{margin:0;padding:0;box-sizing:border-box}
+    body{font-family:system-ui,-apple-system,sans-serif;background:linear-gradient(135deg,#dc2626,#f97316);min-height:100vh;display:flex;align-items:center;justify-content:center;color:white;text-align:center;padding:24px}
+    .box{background:rgba(255,255,255,0.15);backdrop-filter:blur(12px);border-radius:24px;padding:48px 32px;max-width:360px;border:1px solid rgba(255,255,255,0.25)}
+    h1{font-size:24px;margin:16px 0 8px}
+    p{font-size:14px;opacity:0.8;line-height:1.6;margin-bottom:24px}
+    button{background:white;color:#dc2626;border:none;padding:14px 28px;border-radius:14px;font-weight:800;font-size:15px;cursor:pointer}
+  </style>
+</head>
+<body>
+  <div class="box">
+    <div style="font-size:48px">📡</div>
+    <h1>오프라인 상태입니다</h1>
+    <p>인터넷 연결을 확인해주세요.<br>연결이 복구되면 다시 시도해주세요.</p>
+    <button onclick="location.reload()">다시 시도</button>
+  </div>
+</body>
+</html>
