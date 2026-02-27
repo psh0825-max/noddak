@@ -127,32 +127,32 @@ export default function Home() {
         </div>
 
         {/* CTA repeat */}
-        <div className="px-6 mt-10 max-w-xs mx-auto w-full">
-          <div className="card-highlight text-center py-6 px-5">
-            <div className="text-3xl mb-2">🚗</div>
-            <div className="font-bold text-base mb-1">딱지 받으셨나요?</div>
-            <div className="text-xs text-gray-500 mb-4">사진 한 장으로 이의신청 가능 여부를 확인하세요</div>
-            <button onClick={() => setStep('upload')} className="btn-primary text-sm !py-3">
+        <div className="px-6 mt-14 mb-6 max-w-sm mx-auto w-full">
+          <div className="card-highlight text-center py-8 px-6">
+            <div className="text-4xl mb-3">🚗</div>
+            <div className="font-extrabold text-lg mb-2">딱지 받으셨나요?</div>
+            <div className="text-sm text-gray-500 mb-5 leading-relaxed">사진 한 장으로 이의신청<br/>가능 여부를 확인하세요</div>
+            <button onClick={() => setStep('upload')} className="btn-primary text-sm !py-3.5">
               딱지 분석하기 <ChevronRight size={16} />
             </button>
           </div>
         </div>
 
         {/* Trust */}
-        <div className="mt-8 flex justify-center gap-5 text-xs text-gray-400 items-center px-6">
+        <div className="mt-6 flex justify-center gap-6 text-xs text-gray-400 items-center px-6">
           <span className="flex items-center gap-1.5"><Shield size={13} /> 사진 미저장</span>
           <span className="flex items-center gap-1.5"><Scale size={13} /> 실제 법률 근거</span>
           <span className="flex items-center gap-1.5"><Sparkles size={13} /> 완전 무료</span>
         </div>
 
         {/* Footer */}
-        <footer className="text-center py-8 mt-6 space-y-2 border-t border-gray-100">
-          <div className="flex justify-center gap-4 text-xs text-gray-400">
+        <footer className="text-center py-10 mt-8 space-y-3 border-t border-gray-100 mx-6">
+          <div className="flex justify-center gap-5 text-sm text-gray-400">
             <a href="/guide" className="hover:text-red-500 transition">📖 사용 가이드</a>
             <a href="/privacy" className="hover:text-red-500 transition">개인정보처리방침</a>
             <a href="/terms" className="hover:text-red-500 transition">이용약관</a>
           </div>
-          <div className="text-xs text-gray-300">© 2026 LightOn Plus Lab</div>
+          <div className="text-xs text-gray-300 pt-1">© 2026 LightOn Plus Lab</div>
         </footer>
       </div>
     )
