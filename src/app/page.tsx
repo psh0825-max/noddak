@@ -171,15 +171,10 @@ export default function Home() {
           <div className="floating-shape w-20 h-20 bg-white" style={{ top: '60%', left: '-3%', animationDelay: '2s' }} />
           <div className="floating-shape w-16 h-16 bg-white" style={{ top: '30%', left: '15%', animationDelay: '4s' }} />
           <div className="relative z-10 max-w-md mx-auto">
-            <div className="animate-fade-in mb-5">
-              <div className="w-20 h-20 rounded-2xl bg-white/20 backdrop-blur-sm flex items-center justify-center mx-auto mb-4 border border-white/30 animate-pulse-glow">
-                <Car size={38} className="text-white drop-shadow-lg" />
-              </div>
-            </div>
             <div className="animate-fade-in">
               <span className="badge badge-white mb-4 inline-flex"><Sparkles size={12} /> AI 이의신청 도우미</span>
             </div>
-            <h1 className="animate-fade-in-delay text-4xl font-black mb-3 tracking-tight text-white drop-shadow-lg">노딱AI</h1>
+            <h1 className="animate-fade-in-delay text-4xl font-black mb-3 tracking-tight text-white drop-shadow-lg">🚗 노딱AI</h1>
             <p className="animate-fade-in-delay text-white/80 text-base mb-8 max-w-xs mx-auto leading-relaxed">
               주정차 위반 딱지 사진 한 장이면<br/><b className="text-white">AI가 이의신청서를 자동 작성</b>
             </p>
