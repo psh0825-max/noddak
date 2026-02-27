@@ -55,6 +55,9 @@ body {
   color: white;
   position: relative;
   overflow: hidden;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
 }
 .hero-top::before {
   content: ''; position: absolute; inset: 0; pointer-events: none;
