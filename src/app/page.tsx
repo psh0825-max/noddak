@@ -80,8 +80,8 @@ export default function Home() {
         </div>
 
         {/* Stats section */}
-        <div className="relative z-10 -mt-5 px-5">
-          <div className="animate-fade-in-delay-2 grid grid-cols-3 gap-3 max-w-md mx-auto">
+        <div className="relative z-10 -mt-5 px-6">
+          <div className="animate-fade-in-delay-2 grid grid-cols-3 gap-3">
             {[
               { num: '10초', label: '분석 시간', icon: <Zap size={16} className="text-orange-500" /> },
               { num: '무료', label: '이용 요금', icon: <Star size={16} className="text-red-500" /> },
@@ -127,7 +127,7 @@ export default function Home() {
         </div>
 
         {/* CTA repeat */}
-        <div className="px-6 mt-14 mb-6 max-w-sm mx-auto w-full">
+        <div className="px-6 mt-14 mb-6">
           <div className="card-highlight text-center py-8 px-6">
             <div className="text-4xl mb-3">🚗</div>
             <div className="font-extrabold text-lg mb-2">딱지 받으셨나요?</div>
